@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التسكين الفورية فائقة السرعة</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #38bdf8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text: #f8fafc;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg-color); 
+            margin: 0; padding: 15px; color: var(--text); 
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; color: var(--primary); margin-bottom: 20px; font-size: 24px; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+        
+        .main-grid { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+        @media (max-width: 992px) { .main-grid { grid-template-columns: 1fr; } }
+        
+        .panel { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid #334155; height: fit-content; }
+        h3 { margin-top: 0; color: var(--primary); border-bottom: 1px solid #334155; padding-bottom: 8px; font-size: 16px; }
+        
+        textarea { width: 100%; height: 180px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 8px; padding: 10px; font-size: 15px; box-sizing: border-box; }
+        
+        button { width: 100%; padding: 12px; font-size: 15px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .btn-green { background-color: var(--success); color: white; display: none; }
+        .btn-green:hover { background-color: #059669; }
+        
+        .cinema-screen { 
+            background: linear-gradient(180deg, rgba(56,189,248,0.2) 0%, rgba(0,0,0,0) 100%);
+            border-top: 4px solid var(--primary); text-align: center; padding: 10px; margin-bottom: 25px;
+            font-weight: bold; font-size: 14px; color: var(--primary); box-shadow: 0 -10px 20px rgba(56,189,248,0.15);
+        }
+        
+        .cinema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 15px; }
+        
+        .room-card { 
+            background: var(--card-bg); border: 2px solid #475569; border-radius: 10px; padding: 15px;
+            display: flex; flex-direction: column; position: relative;
+        }
+        
+        .room-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .room-title { color: var(--primary); font-weight: bold; font-size: 16px; margin: 0; }
+        .beds-count { font-size: 12px; background: #475569; padding: 2px 6px; border-radius: 4px; }
+        
+        .seats-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 5px; margin-bottom: 10px; }
+        .seat { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+        .seat.occupied { background-color: #0369a1; border: 1px solid var(--primary); }
+        .seat.empty { background-color: #0f172a; border: 1px dashed #475569; }
+        
+        .room-guests-list { margin-top: 5px; font-size: 13px; color: #cbd5e1; border-top: 1px solid #334155; padding-top: 8px; }
+        .guest-item { background: rgba(15, 23, 42, 0.6); padding: 4px 6px; margin-bottom: 4px; border-radius: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        .stats-badge { background: #0369a1; padding: 8px; border-radius: 6px; text-align: center; margin-bottom: 15px; font-weight: bold; font-size: 14px; color: white; }
+        .alert-box { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: #fca5a5; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; }
+        .help-note { font-size: 12px; color: #94a3b8; margin-top: 4px; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏨 لوحة تسكين الغرف التفاعلية الفورية</h1>
+    
+    <div class="main-grid">
+        <div class="panel">
+            <h3>📝 الخطوة 1: إدارة وتعديل الغرف وسرايرها</h3>
+            <textarea id="roomsInput" oninput="processRoomsAndSettle()" placeholder="غرفة 1: 5&#10;غرفة 2: 4"></textarea>
+            <span class="help-note">💡 اكتب اسم الغرفة ثم نقطتين ثم السراير. يمكنك التعديل بيدك مباشرة.</span>
+            
+            <h3 style="margin-top:25px;">👥 الخطوة 2: إدخال أسماء النزلاء</h3>
+            <div class="stats-badge" id="totalBedsStats">إجمالي السراير المتاحة: 0 سرير</div>
+            <textarea id="guestsInput" oninput="processRoomsAndSettle()" placeholder="الصق قائمة الأسماء من الواتساب هنا مباشرة..."></textarea>
+            
+            <button id="downloadBtn" class="btn-green" onclick="downloadExcel()">📥 تحميل الكشف النهائي Excel</button>
+        </div>
+
+        <div>
+            <div class="cinema-screen">🎬 لوحة عرض حالة الغرف والنزلاء (سريعة جداً ولا تحتاج إنترنت)</div>
+            <div id="alertSection"></div>
+            <div class="cinema-grid" id="cinemaGrid"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // إعداد الغرف الافتراضية الأصلية
+    let defaultSetup = "غرفة سعة 8: 8\nغرفة سعة 7: 7\n";
+    for (let i = 1; i <= 13; i++) { defaultSetup += `غرفة رقم ${i} (سعة 5): 5\n`; }
+    for (let i = 1; i <= 2; i++) { defaultSetup += `غرفة رقم ${i} (سعة 4): 4\n`; }
+    document.getElementById('roomsInput').value = defaultSetup.trim();
+
+    let globalRoomsList = [];
+    let globalAssignments = {};
+
+    function processRoomsAndSettle() {
+        const roomsText = document.getElementById('roomsInput').value;
+        const guestsText = document.getElementById('guestsInput').value;
+
+        globalRoomsList = [];
+        let totalBeds = 0;
+        roomsText.split('\n').forEach(line => {
+            if(line.includes(':')) {
+                let parts = line.split(':');
+                let name = parts[0].trim();
+                let cap = parseInt(parts[1]);
+                if(name && !isNaN(cap) && cap > 0) {
+                    globalRoomsList.push({ id: name, capacity: cap });
+                    totalBeds += cap;
+                }
+            }
+        });
+        document.getElementById('totalBedsStats').innerText = `إجمالي السراير المتاحة: ${totalBeds} سرير`;
+
+        const guests = guestsText.split('\n').map(g => g.trim()).filter(g => g !== "");
+
+        let sortedRooms = [...globalRoomsList].sort((a, b) => b.capacity - a.capacity);
+        globalAssignments = {};
+        sortedRooms.forEach(r => globalAssignments[r.id] = { capacity: r.capacity, guests: [] });
+
+        let guestIndex = 0;
+        sortedRooms.forEach(room => {
+            while(globalAssignments[room.id].guests.length < room.capacity && guestIndex < guests.length) {
+                globalAssignments[room.id].guests.push(guests[guestIndex]);
+                guestIndex++;
+            }
+        });
+
+        const alertSection = document.getElementById('alertSection');
+        if(guestIndex < guests.length) {
+            const left = guests.length - guestIndex;
+            alertSection.innerHTML = `<div class="alert-box">🚨 <b>قائمة الانتظار:</b> متبقي ${left} فرد لم يجدوا مكاناً: (${guests.slice(guestIndex).join(' - ')})</div>`;
+        } else {
+            alertSection.innerHTML = '';
+        }
+
+        document.getElementById('downloadBtn').style.display = (guests.length > 0) ? 'block' : 'none';
+
+        const grid = document.getElementById('cinemaGrid');
+        grid.innerHTML = '';
+
+        if(globalRoomsList.length === 0) {
+            grid.innerHTML = `<div style="color:#64748b; text-align:center; grid-column: 1/-1; padding:40px;">يرجى كتابة الغرف لتظهر هنا...</div>`;
+            return;
+        }
+
+        globalRoomsList.forEach(room => {
+            const data = globalAssignments[room.id] || { guests: [] };
+            
+            let seatsHTML = '';
+            for(let i = 0; i < room.capacity; i++) {
+                seatsHTML += data.guests[i] ? `<div class="seat occupied" title="${data.guests[i]}">🛏️</div>` : `<div class="seat empty"></div>`;
+            }
+
+            let guestsListHTML = '';
+            if(data.guests.length > 0) {
+                data.guests.forEach(g => { guestsListHTML += `<span class="guest-item">👤 ${g}</span>`; });
+            } else {
+                guestsListHTML += `<span style="color:#64748b; font-size:12px; display:block; text-align:center;">غرفة فارغة</span>`;
+            }
+
+            grid.innerHTML += `
+                <div class="room-card">
+                    <div class="room-header">
+                        <span class="room-title">${room.id}</span>
+                        <span class="beds-count">${data.guests.length}/${room.capacity} سرير</span>
+                    </div>
+                    <div class="seats-container">${seatsHTML}</div>
+                    <div class="room-guests-list">${guestsListHTML}</div>
+                </div>`;
+        });
+    }
+
+    // كود محلي فائق السرعة لإنشاء ملف إكسيل حقيقي متوافق مع الموبايل وبدون تحميل ملفات خارجية
+    function downloadExcel() {
+        let csvContent = "\uFEFFرقم / اسم الغرفة,سعة السراير الكلية,عدد المسكنين فعلياً,حالة الغرفة,أسماء المقيمين داخل الغرفة\n";
+        globalRoomsList.forEach(r => {
+            const data = globalAssignments[r.id] || { guests: [] };
+            let status = data.guests.length == r.capacity ? "مكتملة" : (data.guests.length == 0 ? "فارغة" : "متاح بها مكان");
+            let names = data.guests.join(' - ') || 'لا يوجد نزلاء';
+            csvContent += `"${r.id}",${r.capacity},${data.guests.length},"${status}","${names}"\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
