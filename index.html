@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التسكين باللمس فائقة الذكاء</title>
+    <!-- مكتبة إكسيل خفيفة مدمجة للآيفون والأندرويد -->
+    <script src="https://cloudflare.com"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --primary: #38bdf8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text: #f8fafc;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding: 10px; margin: 0; direction: rtl; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media(min-width:768px){ .grid { grid-template-columns: 390px 1fr; } }
+        
+        .panel { background: var(--card); padding: 18px; border-radius: 12px; border: 1px solid #475569; height: fit-content; }
+        h3 { margin-top: 0; color: var(--primary); border-bottom: 1px solid #334155; padding-bottom: 6px; font-size: 15px; }
+        
+        textarea { width: 100%; height: 120px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 8px; padding: 10px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; }
+        input { width: 100%; padding: 10px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; }
+        
+        button { width: 100%; padding: 12px; font-weight: bold; font-size: 15px; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; -webkit-appearance: none; }
+        .btn-blue { background-color: var(--primary); color: #000; }
+        .btn-green { background-color: var(--success); color: white; margin-top: 10px; }
+        
+        /* مربع إضافة النزلاء باللمس الذكي */
+        .smart-box { background: #0f172a; border: 1px dashed var(--primary); padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+        .guests-pool { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; max-height: 120px; overflow-y: auto; padding: 4px; }
+        .clickable-guest { background: #334155; color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1px solid #475569; transition: 0.2s; user-select: none; }
+        .clickable-guest:hover { background: var(--primary); color: #000; transform: scale(1.05); }
+        
+        /* لوحة كروت السينما المجمعة للغرف */
+        .cinema-screen { 
+            background: linear-gradient(180deg, rgba(56,189,248,0.15) 0%, rgba(0,0,0,0) 100%);
+            border-top: 4px solid var(--primary); text-align: center; padding: 8px; margin-bottom: 15px;
+            font-weight: bold; font-size: 13px; color: var(--primary);
+        }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+        .card { background: var(--card); border: 2px solid #475569; border-radius: 10px; padding: 12px; position: relative; }
+        .title { color: var(--primary); font-weight: bold; font-size: 15px; border-bottom: 1px solid #334155; padding-bottom: 4px; margin-bottom: 8px; }
+        
+        .beds { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
+        .bed { width: 24px; height: 24px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+        .full { background: #0369a1; border: 1px solid var(--primary); }
+        .empty { border: 1px dashed #475569; background: #0f172a; }
+        
+        .name-list { margin-top: 5px; font-size: 13px; color: #cbd5e1; }
+        .name-tag { background: rgba(0,0,0,0.3); padding: 4px 6px; margin-bottom: 3px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .remove-icon { color: var(--danger); cursor: pointer; font-weight: bold; font-size: 12px; padding: 0 4px; }
+        
+        .info-bar { background: #0369a1; padding: 8px; border-radius: 6px; text-align: center; margin-bottom: 10px; font-size: 13px; font-weight: bold; }
+        .alert-box { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: #fca5a5; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center; color:var(--primary); margin: 8px 0; font-size: 22px;">🏨 لوحة التسكين التفاعلية الذكية باللمس</h2>
+    <div class="grid">
+        <!-- لوحة التحكم الجانبية -->
+        <div class="panel">
+            <!-- المربع الذكي الجديد لإضافة الأسماء باللمس -->
+            <h3>👤 الطريقة 1: إضافة النزلاء باللمس السريع</h3>
+            <div class="smart-box">
+                <div style="display:flex; gap:6px;">
+                    <input type="text" id="singleGuestInput" placeholder="اكتب اسم النزيل هنا لإنشاء زر..." style="margin-bottom:0;">
+                    <button class="btn-blue" onclick="createGuestButton()" style="width:auto; padding:0 15px; margin:0;">➕ توليد زر</button>
+                </div>
+                <div style="font-size:11px; color:#94a3b8; margin-top:6px;">👇 اضغط على اسم النزيل ليتم تسكينه فوراً تلقائياً في السرير الشاغر:</div>
+                <div class="guests-pool" id="guestsPool"></div>
+            </div>
+
+            <h3>📋 الطريقة 2: لصق كشف النزلاء (من الواتساب)</h3>
+            <textarea id="bulkGuestsInput" oninput="syncFromBulkText()" placeholder="الصق قائمة الأسماء هنا دفعة واحدة...&#10;اسم واحد في كل سطر."></textarea>
+            
+            <h3>🛠️ تعديل الغرف والسراير الحالية</h3>
+            <textarea id="roomsInput" oninput="updateRoomsStructure()" style="height:100px;"></textarea>
+            
+            <div class="info-bar" id="statsBar">إجمالي السراير المتاحة: 0</div>
+            <button class="btn-green" id="excelBtn" onclick="exportToExcel()">📥 تحميل كشف التسكين النهائي (Excel)</button>
+        </div>
+
+        <!-- شاشة العرض السينمائية لايف -->
+        <div>
+            <div class="cinema-screen">🎬 شاشة عرض الغرف (السرير الأزرق محجوز 🛏️ | اضغط ❌ بجانب الاسم لتفريغ السرير)</div>
+            <div id="queueAlert"></div>
+            <div class="card-grid" id="cinemaGrid"></div>
+        </div>
+    </div>
+
+<script>
+    // تهيئة الغرف الـ 17 المتاحة لديك في البداية تلقائياً (إجمالي 88 سريراً)
+    let defaultRooms = "غرفة سعة 8: 8\nغرفة سعة 7: 7\n";
+    for(let i=1; i<=13; i++) defaultRooms += `غرفة رقم ${i} (سعة 5): 5\n`;
+    for(let i=1; i<=2; i++) defaultRooms += `غرفة رقم ${i} (سعة 4): 4\n`;
+    document.getElementById('roomsInput').value = defaultRooms.trim();
+
+    // قائمة بأسماء تجريبية جاهزة للضغط واللمس الفوري لترى كيف تعمل
+    let preloadedGuests = ["محمد أحمد", "علي حسن", "محمود جابر", "كريم مصطفى", "أحمد العربي", "سامح عبد العزيز"];
+    
+    let hotelRooms = [];
+    let allocatedGuests = [];
+
+    // توليد أزرار النزلاء في المربع الذكي أول مرة
+    function initGuestPool() {
+        const pool = document.getElementById('guestsPool');
+        pool.innerHTML = '';
+        preloadedGuests.forEach(g => {
+            pool.innerHTML += `<div class="clickable-guest" onclick="addGuestByClick('${g}')">👤 ${g}</div>`;
+        });
+    }
+
+    // إنشاء زر لنزيل جديد يدويّاً
+    function createGuestButton() {
+        const input = document.getElementById('singleGuestInput');
+        const name = input.value.trim();
+        if(!name) return;
+        if(!preloadedGuests.includes(name)) {
+            preloadedGuests.push(name);
+            initGuestPool();
+        }
+        addGuestByClick(name); // تسكينه فوراً عند تفعيل الزر
+        input.value = '';
+    }
+
+    // الخصائص الذكية: عند الضغط على اسم النزيل يتم تسكينه فوراً
+    function addGuestByClick(name) {
+        if(allocatedGuests.includes(name)) {
+            alert('هذا النزيل مسكن بالفعل في إحدى الغرف!');
+            return;
+        }
+        allocatedGuests.push(name);
+        
+        // تحديث المربع النصي التابع للواتساب ليتزامن معه تلقائياً
+        document.getElementById('bulkGuestsInput').value = allocatedGuests.join('\n');
+        renderHotel();
+    }
+
+    // حذف نزيل معين وتفريغ سريره بالضغط على علامة الـ X بجانب اسمه
+    function removeGuest(name) {
+        allocatedGuests = allocatedGuests.filter(g => g !== name);
+        document.getElementById('bulkGuestsInput').value = allocatedGuests.join('\n');
+        renderHotel();
+    }
+
+    // مزامنة الأسماء عند لصق نص كامل أو كشف من الواتساب دفعة واحدة
+    function syncFromBulkText() {
+        const text = document.getElementById('bulkGuestsInput').value;
+        allocatedGuests = text.split('\n').map(g => g.trim()).filter(g => g !== "");
+        renderHotel();
+    }
+
+    // تحديث هيكل الغرف وسرايرها لايف عند تعديل المربع النصي للغرف
+    function updateRoomsStructure() {
+        const text = document.getElementById('roomsInput').value;
+        hotelRooms = [];
+        text.split('\n').forEach(line => {
+            if(line.includes(':')) {
+                let parts = line.split(':');
+                let rName = parts[0].trim();
+                let rCap = parseInt(parts[1]);
+                if(rName && !isNaN(rCap) && rCap > 0) {
+                    hotelRooms.push({ id: rName, cap: rCap });
+                }
+            }
+        });
+        renderHotel();
+    }
+
+    // محرك التسكين الذكي ورسم شاشة العرض المجمعة
+    function renderHotel() {
+        if(hotelRooms.length === 0) updateRoomsStructure();
+
+        // ترتيب الغرف تنازلياً للحصول على أعلى كفاءة ملء
+        let sortedRooms = [...hotelRooms].sort((a, b) => b.cap - a.cap);
+        let totalBeds = hotelRooms.reduce((sum, r) => sum + r.cap, 0);
+        
+        document.getElementById('statsBar').innerText = `إجمالي السراير: ${totalBeds} | النزلاء حالياً: ${allocatedGuests.length}`;
+
+        let assignments = {};
+        sortedRooms.forEach(r => assignments[r.id] = []);
+
+        let gIdx = 0;
+        sortedRooms.forEach(room => {
